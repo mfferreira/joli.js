@@ -1,16 +1,3 @@
-var aes = require('aes');
-var cipher = {
-    bits: 256,
-    encrypt: function(plain, pwd, bits) {
-        if (pwd) { return aes.encrypt(plain, pwd, bits || this.bits); }
-        return plain;
-    },
-    decrypt: function(ciphed, pwd, bits) {
-        if (pwd) { return aes.decrypt(ciphed, pwd, bits || this.bits); }
-        return ciphed;
-    }
-}
-
 var joli = {
     each: function(collection, iterator, bind) {
         var i, l, property;
@@ -157,11 +144,10 @@ var joli = {
 /**
  * Connection
  */
-joli.Connection = function(database, pwd) {
+joli.Connection = function(database) {
     this.dbname = database;
     this.database = Titanium.Database.open(this.dbname);
     this.database.execute('PRAGMA read_uncommitted=true');
-    this.pwd = pwd || '';
 };
 
 joli.Connection.prototype = {
@@ -171,9 +157,6 @@ joli.Connection.prototype = {
     },
     lastInsertRowId: function() {
         return this.database.lastInsertRowId;
-    },
-    getPassword: function() {
-        return this.pwd;
     }
 };
 
@@ -586,8 +569,7 @@ joli.query.prototype = {
             rowData = {};
 
             while (i < fieldCount) {
-                rowData[rows.fieldName(i)] = cipher.decrypt(rows.field(i), joli.connection.getPassword());
-                // rowData[rows.fieldName(i)] = rows.field(i);
+                rowData[rows.fieldName(i)] = rows.field(i);
                 i++;
             }
 
@@ -611,8 +593,7 @@ joli.query.prototype = {
             rowData = {};
 
             while (i < fieldCount) {
-                rowData[rows.fieldName(i)] = cipher.decrypt(rows.field(i), joli.connection.getPassword());
-                // rowData[rows.fieldName(i)] = rows.field(i);
+                rowData[rows.fieldName(i)] = rows.field(i);
                 i++;
             }
 
@@ -655,7 +636,6 @@ joli.query.prototype = {
     set: function(values) {
         joli.each(values, function(expression, value) {
             if (-1 === value.indexOf('=')) {
-                expression = cipher.encrypt(expression, joli.getPassword());
                 this.data.set.push(value + ' = ' + joli.typeValue(expression));
             } else {
                 // some particular expression containing "="
@@ -672,7 +652,6 @@ joli.query.prototype = {
     values: function(values) {
         joli.each(values, function(expression, value) {
             this.data.set.push(value);
-            expression = cipher.encrypt(expression, joli.getPassword());
             this.data.values.push(joli.typeValue(expression));
         }, this);
         return this;
@@ -823,12 +802,12 @@ joli.record.prototype = {
  * In case joli.js is loaded as a CommonJS module
  */
 if (typeof exports === 'object' && exports) {
-    module.exports = function() {
+    exports = function() {
         var api = {
-            connect: function(database, pwd) {
+            connect: function(database) {
     
                 if (database) {
-                    joli.connection = new joli.Connection(database, pwd);
+                    joli.connection = new joli.Connection(database);
                 }
     
                 return joli;
