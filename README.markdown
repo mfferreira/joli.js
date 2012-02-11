@@ -15,20 +15,20 @@ The source code of joli.js is [available on GitHub](https://github.com/xavierlac
     
 or (please note the missing ".js" suffix):
 
-    var joli = require('path/to/joli').connect('your_database_name');
+    var joli = require('path/to/joli').connect('your_database_name', 'your_database_password');
 
 The latter integration mode must be prefered, as it helps sandboxing external libraries. Loading joli.js with `require()` will also allow to use several databases in the same application, which is not possible with `Ti.include()`:
 
     var joliLibrary = require('path/to/joli');
-    var database1 = joliLibrary.connect('first_database');
-    var database2 = joliLibrary.connect('second_database');
+    var database1 = joliLibrary.connect('first_database', 'first_database_password');
+    var database2 = joliLibrary.connect('second_database', 'second_database_password');
 
 ## Configuration
 
 ### Database connection creation
 If you included joli.js with `Titanium.include()`, there is one single required configuration step: configuring the database name. This can be done in only one line, which has to be put before every call to joli.js's API:
 
-    joli.connection = new joli.Connection('your_database_name');
+    joli.connection = new joli.Connection('your_database_name', 'your_database_password');
     
 If you prefered to load joli.js as a CommonJS module, it is not necessary to write this configuration instruction. However, you still may want to change the database name of a connection, and in that case you'll want to use this command.
 
@@ -266,8 +266,8 @@ There are at the moment three open source applications using joli.js:
 It is possible to use several databases with joli.js by loading the library as a CommonJS module:
 
     var joliLibrary = require('path/to/joli');
-    var database1 = joliLibrary.connect('first_database');
-    var database2 = joliLibrary.connect('second_database');
+    var database1 = joliLibrary.connect('first_database', 'first_database_password');
+    var database2 = joliLibrary.connect('second_database', 'second_database_password');
 
 ## Credits and support
 joli.js has been developed by [Xavier Lacot](http://lacot.org/) and is
@@ -276,6 +276,9 @@ licensed under the MIT license.
 Please use GitHub in order to report bugs, but you may also ask for help on how to use joli.js by sending me a mail directly. My email address is xavier@lacot.org.
 
 ## Changelog
+
+### edge
+* added AES encryption to database records
 
 ### master
 * turned joli.js as a commonjs module
